@@ -81,6 +81,9 @@ export class App extends React.Component<any, TState> {
                         });
                     } else if (response.data.status === TServerStatus.RUNNING) {
                         let timings = this.state.timings;
+                        if (this.state.status !== TApplicationStatus.RUNNING) {
+                            timings = undefined;
+                        }
                         if (timings) {
                             timings.succeeded.push(...response.data.timings!.succeeded);
                             response.data.timings!.succeeded = [];
@@ -116,6 +119,9 @@ export class App extends React.Component<any, TState> {
                         }
                     } else if (response.data.status === TServerStatus.COMPLETED) {
                         let timings = this.state.timings;
+                        if (this.state.status !== TApplicationStatus.RUNNING) {
+                            timings = undefined;
+                        }
                         if (timings) {
                             timings.succeeded.push(...response.data.timings!.succeeded);
                             response.data.timings!.succeeded = [];

@@ -17,7 +17,7 @@
     "typescript": "^3.1.1"
   },
   "scripts": {
-    "dev": "run-p server:dev client:dev",
+    "dev": "run-p client:dev",
     "client:dev": "run-s client:watch",
     "client:watch": "parcel watch --target browser --out-dir dist/public/assets --out-file index.js --no-cache client/index.tsx"
   },

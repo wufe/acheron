@@ -37,11 +37,14 @@ export class PerformCommand extends React.Component<TProps, TState> {
         let compose: any;
         let yPoint: any;
         let timings: number[] = [];
+        let average = 0;
         if (this.props.timings) {
             const step = Math.ceil(this.props.timings!.succeeded.length / this.state.width);
-            timings = this.props.timings.succeeded.length < this.state.width ?
-                this.props.timings.succeeded :
-                this.props.timings.succeeded.reduce<number[]>((a, t, i) => {
+            let timingSum = 0;
+            if (this.props.timings.succeeded.length < this.state.width) {
+                timingSum = this.props.timings.succeeded.reduce((sum, timing) => sum + timing, 0);
+            } else {
+                timings = this.props.timings.succeeded.reduce<number[]>((a, t, i) => {
                     if (i % (step) === 0) {
                         const slice = this.props.timings!.succeeded.slice(i, i+step);
                         const average = slice.reduce((sum, element) => sum+element, 0)/slice.length;
@@ -52,8 +55,12 @@ export class PerformCommand extends React.Component<TProps, TState> {
                             a.push(ALPHA * average + (1 - ALPHA) * lastAverage);
                         }
                     }
+                    timingSum += t;
                     return a;
                 }, []);
+            }
+            average = this.props.timings.succeeded.length === 0 ?
+                0 : Math.round(timingSum / this.props.timings.succeeded.length);
 
             xScale = scaleBand({
                 rangeRound: [0, this.state.width],
@@ -87,6 +94,7 @@ export class PerformCommand extends React.Component<TProps, TState> {
                     })}
                 </svg>}
             </div>
+            <div>Average: {average}ms</div>
         </div>;
     }
 }
