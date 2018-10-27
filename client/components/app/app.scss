@@ -1,0 +1,177 @@
+
+
+.app-container {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+
+    h1 {
+        font-family: 'Helvetica Neue';
+        font-weight: 100;
+        user-select: none;
+        font-size: 3rem;
+        color: inherit;
+    }
+
+    h3 {
+        font-family: 'Helvetica Neue';
+        font-weight: 300;
+        user-select: none;
+        font-size: 1.3rem;
+        color: inherit;
+        // text-transform: uppercase;
+    }
+
+    .boot-log {
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: 15px;
+        font-family: 'CourierPrimeCodeRegular';
+        font-size: .7rem;
+        text-shadow: -1px 0 0 white, 0 -1px 0 white, 1px 0 0 white, 0 1px 0 white;
+        line-height: 1.3rem;
+        letter-spacing: .05rem;
+        text-transform: uppercase;
+        transform: scaleY(.9);
+        user-select: none;
+        color: inherit;
+    }
+
+    .scrolling-container {
+        $offset: 5vh;
+
+        position: relative;
+        height: 1px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: inherit;
+        margin-top: $offset;
+
+        height: 100%;
+        margin-top: unset;
+        padding: 20px;
+        box-sizing: border-box;
+
+        .scrolling-content {
+            position: absolute;
+            bottom: 0;
+            color: inherit;
+            max-height: 50vh;
+            overflow: auto;
+
+            max-height: 50vh + $offset;
+            margin-bottom: -$offset;
+
+            max-height: 100%;
+            margin-bottom: unset;
+            position: relative;
+            bottom: unset;
+
+
+            .terminal-container {
+                font-family: 'CourierPrimeCodeRegular';
+                font-size: .75rem;
+                text-shadow: -1px 0 0 rgba(black, .1), 0 -1px 0 rgba(black, .1), 1px 0 0 white, 0 1px 0 white;
+                font-weight: 100;
+                line-height: 1.3rem;
+                letter-spacing: .05rem;
+                transform: scaleY(.9);
+                color: inherit;
+                min-width: 350px;
+
+                .graph-command {
+                    height: 50px;
+                    margin: 30px;
+                }
+
+                > * {
+                    color: inherit;
+                    height: 27px;
+                    display: flex;
+                    align-items: center;
+
+                    &.echo {
+                        &.error {
+                            color: #bb0000;
+                        }
+                        &.success {
+                            color: #4caf50;
+                        }
+                        &.warning {
+                            color: #ffc107;
+                        }
+                        &.info {
+                            color: #2196f3;
+                        }
+                    }
+
+                    input[type=text], input[type=password] {
+                        font-family: inherit;
+                        font-size: inherit;
+                        text-shadow: inherit;
+                        font-weight: inherit;
+                        line-height: inherit;
+                        letter-spacing: inherit;
+                        transform: inherit;
+                        color: inherit;
+
+                        border: 1px solid #EAEAEA;
+                        border-radius: 3px;
+                        padding: 4px 5px;
+                        outline: none;
+                        margin: 0 10px;
+                    }
+                    select {
+                        font-family: inherit;
+                        font-size: inherit;
+                        text-shadow: inherit;
+                        font-weight: inherit;
+                        line-height: inherit;
+                        letter-spacing: inherit;
+                        transform: inherit;
+                        color: inherit;
+
+                        background: white;
+                        border: 1px solid transparent;
+                        border-radius: 3px;
+                        padding: 4px 5px;
+                        outline: none;
+                    }
+
+                    span {
+                        padding: 0 10px 0 0;
+                    }
+                }
+            }
+        }
+    }
+
+    &.dark-theme {
+        color: #EEE;
+        background: #232323;
+
+        .boot-log {
+            text-shadow: -1px 0 0 black, 0 -1px 0 black, 1px 0 0 black, 0 1px 0 black;
+        }
+
+        .scrolling-container .scrolling-content .terminal-container {
+            text-shadow: -1px 0 0 rgba(white, .1), 0 -1px 0 rgba(white, .1), 1px 0 0 black, 0 1px 0 black;
+
+            > * {
+                > input[type=text], > input[type=password] {
+                    background: #232323;
+                    border: 1px solid #666;
+                }
+                select {
+                    background: #232323;
+                }
+            }
+        }
+    }    
+}
