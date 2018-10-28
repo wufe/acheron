@@ -56,8 +56,9 @@ export class PerformCommand extends React.Component<TProps, TState> {
             const step = Math.floor(this.props.timings!.succeeded.length / this.state.width);
             let timingSum = 0;
             if (this.props.timings.succeeded.length < this.state.width) {
-                this.props.timings.succeeded.forEach(timing => {
+                timings = this.props.timings.succeeded.map(timing => {
                     timingSum += timing;
+                    return timing;
                 });
             } else {
                 timings = [];
@@ -74,33 +75,6 @@ export class PerformCommand extends React.Component<TProps, TState> {
                     }
                     timingSum += average;
                 }
-                // const leftOver = this.props.timings.succeeded.length - (step * this.state.width);
-                // console.log({leftOver});
-                // const lastEndingIndex = (this.state.width-1)*step+step;
-                // console.log({succeeded: this.props.timings.succeeded.length, lastEndingIndex})
-                // timings = this.props.timings.succeeded.reduce<number[]>((a, t, i) => {
-                //     if (i % (step) === 0) {
-                //         const slice = this.props.timings!.succeeded.slice(i, i+step);
-                //         const average = slice.reduce((sum, element) => sum+element, 0)/slice.length;
-                //         const lastEMA = a.length > 0 ? a[a.length-1] : null;
-                        // if (lastEMA === null) {
-                        //     a.push(average);
-                        // } else {
-                        //     a.push(ALPHA * average + (1 - ALPHA) * lastEMA);
-                        // }
-                //     }
-                //     timingSum += t;
-                //     return a;
-                // }, []);
-                // console.log({
-                //     full: this.props.timings.succeeded.length,
-                //     reduced: timings.length,
-                //     step,
-                //     exactStep: this.props.timings.succeeded.length / this.state.width,
-                //     leftover: this.props.timings.succeeded.length % step,
-                //     exactLeftover: this.props.timings.succeeded.length % (this.props.timings.succeeded.length/this.state.width),
-                //     width: this.state.width
-                // });
             }
             average = (this.props.timings.succeeded.length === 0 ?
                 0 : (timingSum / this.props.timings.succeeded.length)).toFixed(2);
