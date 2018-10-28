@@ -211,10 +211,7 @@ export class App extends React.Component<any, TState> {
     submitStressCommand = (stressCommand: TStressRequestCommand) => {
         // stop polling
         this.intervalSubscription.unsubscribe();
-        this.addConsoleMessage({
-            type: TConsoleMessageType.ECHO,
-            data: { content: 'Checking server status..', style: 'info' }
-        }).then(() => retrieveStatus())
+        retrieveStatus().then()
             .then(({data}) => {
                 if (data.status === TServerStatus.IDLE) {
                     const url = /^http/i.test(stressCommand.url) ? stressCommand.url : `http://${stressCommand.url}`;

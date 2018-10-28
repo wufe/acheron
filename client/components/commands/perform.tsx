@@ -50,7 +50,7 @@ export class PerformCommand extends React.Component<TProps, TState> {
         let xPoint: any;
         let yPoint: any;
         let timings: number[] = [];
-        let average = 0;
+        let average = "0";
         let succeededAmount = 0;
         if (this.props.timings) {
             const step = Math.floor(this.props.timings!.succeeded.length / this.state.width);
@@ -102,8 +102,8 @@ export class PerformCommand extends React.Component<TProps, TState> {
                 //     width: this.state.width
                 // });
             }
-            average = this.props.timings.succeeded.length === 0 ?
-                0 : Math.round(timingSum / this.props.timings.succeeded.length);
+            average = (this.props.timings.succeeded.length === 0 ?
+                0 : (timingSum / this.props.timings.succeeded.length)).toFixed(2);
             succeededAmount = this.props.timings.succeeded.length;
 
             xScale = scaleBand({
