@@ -29,7 +29,7 @@ type TState = {
 };
 
 const CHECK_POLL_INTERVAL = 500;
-const PERFORM_POLL_INTERVAL = 50;
+const PERFORM_POLL_INTERVAL = 200;
 
 export class App extends React.Component<any, TState> {
     intervalSubscription: Subscription;
@@ -97,11 +97,16 @@ export class App extends React.Component<any, TState> {
                             promise = new Promise<void>(resolve => {
                                 this.setState({
                                     ...this.state,
-                                    status: TApplicationStatus.RUNNING,
-                                    request: response.data.request,
-                                    runningStressId: response.data.request!.id,
-                                    timings: timings ? {...timings} : undefined
-                                }, () => resolve());
+                                    runningStressId: ''
+                                }, () => {
+                                    this.setState({
+                                        ...this.state,
+                                        status: TApplicationStatus.RUNNING,
+                                        request: response.data.request,
+                                        runningStressId: response.data.request!.id,
+                                        timings: timings ? {...timings} : undefined
+                                    }, () => resolve());
+                                });
                             }).then(() => this.addConsoleMessage({
                                 type: TConsoleMessageType.PERFORM,
                                 data: {
@@ -150,7 +155,6 @@ export class App extends React.Component<any, TState> {
                         promise = promise.then(() => new Promise<void>(resolve => this.setState({
                             ...this.state,
                             status: TApplicationStatus.COMPLETED,
-                            runningStressId: '',
                             timings: timings ? {...timings} : undefined
                         }, () => resolve()))).then(() => {
                             if (this.intervalSubscription)

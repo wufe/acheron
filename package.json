@@ -23,6 +23,9 @@
   },
   "dependencies": {
     "@types/axios": "^0.14.0",
+    "@vx/curve": "^0.0.165",
+    "@vx/gradient": "^0.0.165",
+    "@vx/grid": "^0.0.179",
     "@vx/group": "^0.0.170",
     "@vx/scale": "^0.0.179",
     "@vx/shape": "^0.0.179",

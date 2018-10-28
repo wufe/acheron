@@ -91,6 +91,7 @@ export class StressCommand extends React.Component<TProps, TState> {
                     onChange={this.valueChanged('timeout')}
                     onKeyUp={filterKeyEnter(this.parseCommandAndSubmit)}
                     placeholder="3000"
+                    style={{ width: '70px' }}
                     title="Timeout in milliseconds"
                     type="text"
                     value={this.state.timeout} />}
@@ -99,6 +100,7 @@ export class StressCommand extends React.Component<TProps, TState> {
                     onChange={this.valueChanged('requests')}
                     onKeyUp={filterKeyEnter(this.parseCommandAndSubmit)}
                     placeholder="3000"
+                    style={{ width: '70px' }}
                     title="Amount of requests to be performed"
                     type="text"
                     value={this.state.requests} />}
@@ -108,6 +110,7 @@ export class StressCommand extends React.Component<TProps, TState> {
                     onChange={this.valueChanged('threads')}
                     onKeyUp={filterKeyEnter(this.parseCommandAndSubmit)}
                     placeholder="10"
+                    style={{ width: '60px' }}
                     title="Number of threads to be used to perform requests"
                     type="text"
                     value={this.state.threads} />}

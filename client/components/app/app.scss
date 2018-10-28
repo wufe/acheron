@@ -86,8 +86,42 @@
                 min-width: 350px;
 
                 .graph-command {
-                    height: 50px;
+                    height: 100px;
                     margin: 30px;
+                }
+
+                button.action {
+                    text-transform: uppercase;
+                    background: #555;
+                    color: white;
+                    border: 1px solid #777;
+                    border-radius: 2px;
+                    padding: 3px 10px;
+                    cursor: pointer;
+                    outline: none;
+                    box-shadow: -1px 0 0 rgba(black, .5), 0 -1px 0 rgba(black, .5), 1px 0 0 rgba(black, .5), 0 1px 0 rgba(black, .5),
+                        inset -1px 0 0 rgba(white, .1), inset 0 -1px 0 rgba(white, .1), inset 1px 0 0 rgba(white, .1), inset 0 1px 0 rgba(white, .1);
+
+                    &:hover {
+                        background: #666;
+                        border: 1px solid #888;
+                        box-shadow: -1px 0 0 rgba(black, .5), 0 -1px 0 rgba(black, .5), 1px 0 0 rgba(black, .5), 0 1px 0 rgba(black, .5),
+                            inset -1px 0 0 rgba(white, .1), inset 0 -1px 0 rgba(white, .1), inset 1px 0 0 rgba(white, .1), inset 0 1px 0 rgba(white, .1),
+                            inset 0 0 8px rgba(white, .3);
+                    }
+
+                    &:active {
+                        box-shadow: -1px 0 0 rgba(black, .5), 0 -1px 0 rgba(black, .5), 1px 0 0 rgba(black, .5), 0 1px 0 rgba(black, .5),
+                            inset -1px 0 0 rgba(white, .1), inset 0 -1px 0 rgba(white, .1), inset 1px 0 0 rgba(white, .1), inset 0 1px 0 rgba(white, .1),
+                            inset 0 0 5px rgba(black, .3);
+                    }
+                }
+
+                .display-flex {
+                    display: flex;
+                    &.space-between-content {
+                        justify-content: space-between;
+                    }
                 }
 
                 > * {

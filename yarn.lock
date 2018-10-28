@@ -655,11 +655,28 @@
     "@types/express-serve-static-core" "*"
     "@types/mime" "*"
 
-"@vx/curve@0.0.165":
+"@vx/curve@0.0.165", "@vx/curve@^0.0.165":
   version "0.0.165"
   resolved "https://registry.yarnpkg.com/@vx/curve/-/curve-0.0.165.tgz#330d1512dceae0af43dd3eb4c85523132030a3a0"
   dependencies:
     d3-shape "^1.0.6"
+
+"@vx/gradient@^0.0.165":
+  version "0.0.165"
+  resolved "https://registry.yarnpkg.com/@vx/gradient/-/gradient-0.0.165.tgz#0cc0fe873e6acded4943fa274f68601ad5a50a38"
+  dependencies:
+    classnames "^2.2.5"
+    prop-types "^15.5.7"
+
+"@vx/grid@^0.0.179":
+  version "0.0.179"
+  resolved "https://registry.yarnpkg.com/@vx/grid/-/grid-0.0.179.tgz#f4d658762839c6734d7c83679d3ab5b2ff424fef"
+  dependencies:
+    "@vx/group" "0.0.170"
+    "@vx/point" "0.0.165"
+    "@vx/shape" "0.0.179"
+    classnames "^2.2.5"
+    prop-types "^15.6.2"
 
 "@vx/group@0.0.170", "@vx/group@^0.0.170":
   version "0.0.170"
@@ -677,7 +694,7 @@
   dependencies:
     d3-scale "^2.0.0"
 
-"@vx/shape@^0.0.179":
+"@vx/shape@0.0.179", "@vx/shape@^0.0.179":
   version "0.0.179"
   resolved "https://registry.yarnpkg.com/@vx/shape/-/shape-0.0.179.tgz#038c449743d1e05b7b2d20151e9ab6e739f73516"
   dependencies:
@@ -4272,7 +4289,7 @@ process@^0.11.10:
   version "0.11.10"
   resolved "https://registry.yarnpkg.com/process/-/process-0.11.10.tgz#7332300e840161bda3e69a1d1d91a7d4bc16f182"
 
-prop-types@^15.5.10, prop-types@^15.6.2:
+prop-types@^15.5.10, prop-types@^15.5.7, prop-types@^15.6.2:
   version "15.6.2"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.2.tgz#05d5ca77b4453e985d60fc7ff8c859094a497102"
   dependencies:
