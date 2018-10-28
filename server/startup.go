@@ -94,7 +94,7 @@ func authenticationMiddleware() Adapter {
 }
 
 func getControllerAction(w http.ResponseWriter, r *http.Request) presentation.Action {
-	ctrls := [...](presentation.Controller){controllers.MakeStressController(), controllers.MakeAuthController(), controllers.MakeStaticController()}
+	ctrls := [...](presentation.Controller){controllers.MakeTestController(), controllers.MakeStressController(), controllers.MakeAuthController(), controllers.MakeStaticController()}
 
 	controllerManager := controllers.ControllerManager{}
 	controllerManager.For(r)
