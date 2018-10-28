@@ -89,6 +89,8 @@ typings/
 
 # End of https://www.gitignore.io/api/node,visualstudiocode
 
+.DS_Store
+
 .env
 
 dist/public/assets/*
