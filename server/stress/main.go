@@ -46,6 +46,7 @@ func (suite *StressSuite) HandleRequest(suiteRequest *StressSuiteRequest) {
 		Results: &results,
 	}
 
+	startingTime := time.Now()
 	for i := 0; i < suiteRequest.Threads; i++ {
 		result := &PerformedRequestsResult{
 			SucceededRequestsTimings: []int64{},
@@ -57,14 +58,22 @@ func (suite *StressSuite) HandleRequest(suiteRequest *StressSuiteRequest) {
 			waitGroup.Done()
 		}()
 	}
-
 	waitGroup.Wait()
-	stressStatusInstance.Status = STATUS_COMPLETED
 
-	succeededRequests := 0
+	timeDifference := uint64(time.Now().Sub(startingTime) / time.Millisecond)
+	stressStatusInstance.TotalTime = timeDifference
+
+	var succeededRequests uint64
+	succeededRequests = 0
+	var failedRequests uint64
+	failedRequests = 0
 	for i := 0; i < suiteRequest.Threads; i++ {
-		succeededRequests += results[i].SucceededRequests
+		succeededRequests += uint64(results[i].SucceededRequests)
+		failedRequests += uint64(results[i].FailedRequests)
 	}
+	stressStatusInstance.TotalSucceededRequests = succeededRequests
+	stressStatusInstance.TotalFailedRequests = failedRequests
+	stressStatusInstance.Status = STATUS_COMPLETED
 	fmt.Println("Number of succeeded requests", succeededRequests)
 }
 

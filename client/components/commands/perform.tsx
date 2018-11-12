@@ -11,6 +11,9 @@ type TProps = {
     request?: TExecutingStressCommandRequest;
     timings?: TExecutingStressCommandTimings;
     completed: boolean;
+    totalSucceeded?: number;
+    totalFailed?: number;
+    totalTime?: number;
 };
 
 type TState = {
@@ -38,9 +41,7 @@ export class PerformCommand extends React.Component<TProps, TState> {
     };
 
     shouldComponentUpdate(nextProps: TProps, nextState: TState) {
-        return !this.props.completed/* &&
-            (nextState !== this.state ||
-            this.checkPropsChanged(nextProps))*/;
+        return !this.props.completed;
     }
 
     render() {
@@ -76,8 +77,8 @@ export class PerformCommand extends React.Component<TProps, TState> {
                     timingSum += average;
                 }
             }
-            average = (this.props.timings.succeeded.length === 0 ?
-                0 : (this.props.timings.succeeded.reduce((s, i) => s + i, 0) / this.props.timings.succeeded.length)).toFixed(2);
+            average = (this.props.timings.succeeded.length === 0 ? 0 :
+                    (this.props.timings.succeeded.reduce((s, i) => s + i, 0) / this.props.timings.succeeded.length)).toFixed(2);
             succeededAmount = this.props.timings.succeeded.length;
 
             xScale = scaleBand({
@@ -154,8 +155,10 @@ export class PerformCommand extends React.Component<TProps, TState> {
                         curve={curveMonotoneX} />
                 </svg>}
             </div>
-            <div>Average: {average}ms</div>
-            <div>Succeeded requests: {succeededAmount}</div>
+            <div>Average (ms per request): {average}ms</div>
+            <div>Succeeded requests: {this.props.totalSucceeded || succeededAmount}</div>
+            {!!this.props.totalTime && <div>Total time elapsed: {this.props.totalTime}ms</div>}
+            {!!this.props.totalTime && !!this.props.totalSucceeded && <div>Total average: {(this.props.totalTime / this.props.totalSucceeded).toFixed(2)}ms</div>}
         </div>;
     }
 }

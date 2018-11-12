@@ -1,3 +1,5 @@
+import { TExecutingStressCommandRequest } from "../net/types";
+
 export enum TConsoleMessageType {
     HEAD = "head",
     BOOTING = "booting",
@@ -14,8 +16,21 @@ export enum TStressMode {
 }
 
 export type TConsoleMessage<T = any> = {
-    type: string;
+    type: TConsoleMessageType;
     data?: T;
+};
+
+export type TPerformMessageData = {
+    id: string;
+    running: boolean;
+    request: TExecutingStressCommandRequest;
+    timings: {
+        failed: number[];
+        succeeded: number[];
+    };
+    totalSucceeded?: number;
+    totalFailed?: number;
+    totalTime?: number;
 };
 
 export type TStressRequestCommand = {

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { HeadCommand, BootingCommand, EchoCommand } from '../commands/static';
 import { StressCommand } from '../commands/stress';
-import { TConsoleMessage, TConsoleMessageType, TStressRequestCommand } from '../console/types';
+import { TConsoleMessage, TConsoleMessageType, TStressRequestCommand, TPerformMessageData } from '../console/types';
 import { interval, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import Axios, { AxiosResponse } from 'axios';
@@ -61,106 +61,149 @@ export class App extends React.Component<any, TState> {
         });
     }
 
+    setStateAsPromise = (state: Partial<TState>) => new Promise<void>(resolve =>
+        this.setState({
+            ...this.state,
+            ...state
+        }, resolve));
+
     registerPoll(milliseconds = CHECK_POLL_INTERVAL) {
         this.intervalSubscription = interval(milliseconds)
             .pipe(switchMap(_ => retrieveStatus(authenticationHolder)))
                 .subscribe(response => {
-                    if (response.data.status === TServerStatus.IDLE &&
-                        this.state.status !== TApplicationStatus.IDLE) {
-                        let consoleMessages = [...this.state.consoleMessages];
-                        let promise = Promise.resolve();
-                        if (consoleMessages.length === 0 ||
-                            consoleMessages[consoleMessages.length-1].type !== TConsoleMessageType.STRESS) {
-                            promise = this.addConsoleMessage({ type: TConsoleMessageType.STRESS });
-                        }
-                        promise.then(() => {
-                            this.setState({
-                                ...this.state,
-                                status: TApplicationStatus.IDLE
-                            });
-                        });
-                    } else if (response.data.status === TServerStatus.RUNNING) {
-                        let timings = this.state.timings;
-                        if (this.state.status !== TApplicationStatus.RUNNING) {
-                            timings = undefined;
-                        }
-                        if (timings) {
-                            timings.succeeded.push(...response.data.timings!.succeeded);
-                            response.data.timings!.succeeded = [];
-                            timings.failed.push(...response.data.timings!.failed);
-                            response.data.timings!.failed = [];
-                        } else {
-                            timings = response.data.timings;
-                        }
-                        let promise = Promise.resolve();
-                        if (this.state.status !== TApplicationStatus.RUNNING) {
-                            promise = new Promise<void>(resolve => {
+                    if (response.data.status === TServerStatus.IDLE) {
+                        if (this.state.status !== TApplicationStatus.IDLE) {
+                            let consoleMessages = [...this.state.consoleMessages];
+                            let promise = Promise.resolve();
+                            const shouldRequestStressCommand = consoleMessages.length === 0 ||
+                                consoleMessages[consoleMessages.length-1].type !== TConsoleMessageType.STRESS;
+                            if (shouldRequestStressCommand) {
+                                // In order to always have a stress command request (the one which seems like a form)
+                                promise = this.addConsoleMessage({ type: TConsoleMessageType.STRESS });
+                            }
+                            promise.then(() => {
                                 this.setState({
                                     ...this.state,
-                                    runningStressId: ''
-                                }, () => {
-                                    this.setState({
-                                        ...this.state,
-                                        status: TApplicationStatus.RUNNING,
-                                        request: response.data.request,
-                                        runningStressId: response.data.request!.id,
-                                        timings: timings ? {...timings} : undefined
-                                    }, () => resolve());
+                                    status: TApplicationStatus.IDLE
                                 });
-                            }).then(() => this.addConsoleMessage({
-                                type: TConsoleMessageType.PERFORM,
-                                data: {
-                                    uuid: response.data.request!.id
-                                }
-                            })).then(() => {
-                                this.intervalSubscription.unsubscribe();
-                                this.registerPoll(PERFORM_POLL_INTERVAL);
                             });
-                        } else {
-                            this.setState({
-                                ...this.state,
-                                timings
-                            });
+                        }
+                    } else if (response.data.status === TServerStatus.RUNNING) {
+                        if (response.data.timings && response.data.request) {
+                            if (this.state.status !== TApplicationStatus.RUNNING) {
+                                this.addConsoleMessage<TPerformMessageData>({
+                                    type: TConsoleMessageType.PERFORM,
+                                    data: {
+                                        id: response.data.request.id,
+                                        request: response.data.request,
+                                        running: true,
+                                        timings: { ...response.data.timings }
+                                    }
+                                }).then(() =>
+                                    this.setStateAsPromise({ status: TApplicationStatus.RUNNING })
+                                ).then(() => {
+                                    this.intervalSubscription.unsubscribe();
+                                    this.registerPoll(PERFORM_POLL_INTERVAL);
+                                })
+                            } else {
+                                const {consoleMessages} = this.state;
+                                const lastMessage = consoleMessages[consoleMessages.length-1] as TConsoleMessage<TPerformMessageData>;
+                                if (lastMessage.type !== TConsoleMessageType.PERFORM)
+                                    throw new Error('Last message should be "Perform": an application in "Running" state can only have a perform message as last message');
+                                this.setStateAsPromise({
+                                    consoleMessages: [
+                                        ...consoleMessages.filter((_, i) => i !== consoleMessages.length -1),
+                                        {
+                                            ...lastMessage,
+                                            data: {
+                                                ...lastMessage.data,
+                                                timings: {
+                                                    ...lastMessage.data!.timings, // TODO: Increment failed too
+                                                    succeeded: [...lastMessage.data!.timings.succeeded, ...response.data.timings.succeeded]
+                                                }
+                                            }
+                                        } as TConsoleMessage<TPerformMessageData>
+                                    ]
+                                });
+                            }
                         }
                     } else if (response.data.status === TServerStatus.COMPLETED) {
-                        let timings = this.state.timings;
-                        if (this.state.status !== TApplicationStatus.RUNNING) {
-                            timings = undefined;
+                        if (response.data.timings) {
+                            const {consoleMessages} = this.state;
+                            const lastMessage = consoleMessages[consoleMessages.length-1] as TConsoleMessage<TPerformMessageData>;
+                            // TODO: Even if this state might be strange, a completed server request could encounter
+                            // a client state different from "running".
+                            // Need to tackle this issue.
+                            // e.g. The client has been opened only after the server has performed a request
+                            // e.g. The client receives a completed performed request before setting its state to "running"
+                            if (lastMessage.type !== TConsoleMessageType.PERFORM)
+                                throw new Error('Last message should be "Perform": an application in "Running" state can only have a perform message as last message');
+                            this.setStateAsPromise({
+                                consoleMessages: [
+                                    ...consoleMessages.filter((_, i) => i !== consoleMessages.length -1),
+                                    {
+                                        ...lastMessage,
+                                        data: {
+                                            ...lastMessage.data,
+                                            running: false,
+                                            timings: {
+                                                ...lastMessage.data!.timings, // TODO: Increment failed too
+                                                succeeded: [...lastMessage.data!.timings.succeeded, ...response.data.timings.succeeded]
+                                            },
+                                            totalSucceeded: response.data!.totalSucceeded,
+                                            totalFailed: response.data.totalFailed,
+                                            totalTime: response.data.totalTime
+                                        }
+                                    } as TConsoleMessage<TPerformMessageData>
+                                ]
+                            }).then(() => {
+                                if (this.intervalSubscription)
+                                    this.intervalSubscription.unsubscribe();
+                                this.registerPoll();
+                            });
                         }
-                        if (timings) {
-                            timings.succeeded.push(...response.data.timings!.succeeded);
-                            response.data.timings!.succeeded = [];
-                            timings.failed.push(...response.data.timings!.failed);
-                            response.data.timings!.failed = [];
-                        } else {
-                            timings = response.data.timings;
-                        }
-                        let promise = Promise.resolve();
-                        if (this.state.status !== TApplicationStatus.RUNNING) {
-                            promise = promise.then(() => new Promise<void>(resolve => {
-                                this.setState({
-                                    ...this.state,
-                                    status: TApplicationStatus.RUNNING,
-                                    request: response.data.request,
-                                    runningStressId: response.data.request!.id,
-                                    timings: timings ? {...timings} : undefined
-                                }, () => resolve());
-                            })).then(() => this.addConsoleMessage({
-                                type: TConsoleMessageType.PERFORM,
-                                data: {
-                                    uuid: response.data.request!.id
-                                }
-                            }));
-                        }
-                        promise = promise.then(() => new Promise<void>(resolve => this.setState({
-                            ...this.state,
-                            status: TApplicationStatus.COMPLETED,
-                            timings: timings ? {...timings} : undefined
-                        }, () => resolve()))).then(() => {
-                            if (this.intervalSubscription)
-                                this.intervalSubscription.unsubscribe();
-                            this.registerPoll();
-                        })
+                        
+                        // #region old
+                        // let timings = this.state.timings;
+                        // if (this.state.status !== TApplicationStatus.RUNNING) {
+                        //     timings = undefined;
+                        // }
+                        // if (timings) {
+                        //     timings.succeeded.push(...response.data.timings!.succeeded);
+                        //     response.data.timings!.succeeded = [];
+                        //     timings.failed.push(...response.data.timings!.failed);
+                        //     response.data.timings!.failed = [];
+                        // } else {
+                        //     timings = response.data.timings;
+                        // }
+                        // let promise = Promise.resolve();
+                        // if (this.state.status !== TApplicationStatus.RUNNING) {
+                        //     promise = promise.then(() => new Promise<void>(resolve => {
+                        //         this.setState({
+                        //             ...this.state,
+                        //             status: TApplicationStatus.RUNNING,
+                        //             request: response.data.request,
+                        //             runningStressId: response.data.request!.id,
+                        //             timings: timings ? {...timings} : undefined
+                        //         }, () => resolve());
+                        //     })).then(() => this.addConsoleMessage({
+                        //         type: TConsoleMessageType.PERFORM,
+                        //         data: {
+                        //             uuid: response.data.request!.id
+                        //         }
+                        //     }));
+                        // }
+                        // promise = promise.then(() => new Promise<void>(resolve => this.setState({
+                        //     ...this.state,
+                        //     status: TApplicationStatus.COMPLETED,
+                        //     runningStressId: '',
+                        //     timings: timings ? {...timings} : undefined
+                        // }, () => resolve()))).then(() => {
+                        //     if (this.intervalSubscription)
+                        //         this.intervalSubscription.unsubscribe();
+                        //     this.registerPoll();
+                        // })
+                        // #endregion
                     }
                 }, error => {
                     const response: AxiosResponse = error.response;
@@ -266,10 +309,16 @@ export class App extends React.Component<any, TState> {
                                     return <EchoCommand key={i}
                                         {...m.data} />
                                 case TConsoleMessageType.PERFORM:
-                                    return <PerformCommand key={i}
-                                        completed={this.state.runningStressId !== m.data.uuid}
-                                        request={this.state.request}
-                                        timings={this.state.timings} />
+                                    {
+                                        const {data} = m as TConsoleMessage<TPerformMessageData>;
+                                        return <PerformCommand key={i}
+                                            completed={!data!.running}
+                                            request={data!.request}
+                                            timings={data!.timings}
+                                            totalSucceeded={data!.totalSucceeded}
+                                            totalFailed={data!.totalFailed}
+                                            totalTime={data!.totalTime} />;
+                                    }
                                 default:
                                     return null;
                             }

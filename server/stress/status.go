@@ -9,9 +9,12 @@ const (
 )
 
 type StressStatus struct {
-	Status  StressStatusType
-	Request *StressSuiteRequest
-	Results *[]*PerformedRequestsResult
+	Status                 StressStatusType
+	Request                *StressSuiteRequest
+	Results                *[]*PerformedRequestsResult
+	TotalSucceededRequests uint64
+	TotalFailedRequests    uint64
+	TotalTime              uint64
 }
 
 var stressStatusInstance *StressStatus

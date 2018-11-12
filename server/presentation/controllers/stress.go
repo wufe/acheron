@@ -71,9 +71,12 @@ type RunningStressResponseTimingsPayload struct {
 }
 
 type RunningStressResponsePayload struct {
-	Status  string                               `json:"status"`
-	Request *RunningStressResponseRequestPayload `json:"request"`
-	Timings *RunningStressResponseTimingsPayload `json:"timings"`
+	Status                 string                               `json:"status"`
+	Request                *RunningStressResponseRequestPayload `json:"request"`
+	Timings                *RunningStressResponseTimingsPayload `json:"timings"`
+	TotalSucceededRequests uint64                               `json:"totalSucceeded"`
+	TotalFailedRequests    uint64                               `json:"totalFailed"`
+	TotalTime              uint64                               `json:"totalTime"`
 }
 
 func (stressController *StressController) getStressStatus(w http.ResponseWriter, r *http.Request) {
@@ -128,6 +131,9 @@ func (stressController *StressController) getStressStatus(w http.ResponseWriter,
 					FailedRequestsTimings:    totalFailedRequestsTimings,
 					SucceededRequestsTimings: totalSucceededRequestsTimings,
 				},
+				TotalSucceededRequests: stressStatus.TotalSucceededRequests,
+				TotalFailedRequests:    stressStatus.TotalFailedRequests,
+				TotalTime:              stressStatus.TotalTime,
 			})(w, r)
 			// TODO: It may require a different approach
 			if status == "completed" {

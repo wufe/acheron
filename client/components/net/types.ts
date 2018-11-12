@@ -23,4 +23,7 @@ export type TStatusResponsePayload = {
     status: TServerStatus;
     request?: TExecutingStressCommandRequest;
     timings?: TExecutingStressCommandTimings;
+    totalSucceeded?: number;
+    totalFailed?: number;
+    totalTime?: number;
 };
