@@ -77,7 +77,7 @@ export class PerformCommand extends React.Component<TProps, TState> {
                 }
             }
             average = (this.props.timings.succeeded.length === 0 ?
-                0 : (timingSum / this.props.timings.succeeded.length)).toFixed(2);
+                0 : (this.props.timings.succeeded.reduce((s, i) => s + i, 0) / this.props.timings.succeeded.length)).toFixed(2);
             succeededAmount = this.props.timings.succeeded.length;
 
             xScale = scaleBand({
