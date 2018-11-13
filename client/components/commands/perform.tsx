@@ -9,7 +9,7 @@ const { scaleLinear, scaleBand, scaleTime } = require('@vx/scale');
 
 type TProps = {
     request?: TExecutingStressCommandRequest;
-    timings?: TExecutingStressCommandTimings;
+    timings: TExecutingStressCommandTimings;
     completed: boolean;
     totalSucceeded?: number;
     totalFailed?: number;
@@ -45,6 +45,7 @@ export class PerformCommand extends React.Component<TProps, TState> {
     }
 
     render() {
+        const {succeeded} = this.props.timings;
         let xScale: any;
         let yScale: any;
         let compose: any;
@@ -54,19 +55,16 @@ export class PerformCommand extends React.Component<TProps, TState> {
         let average = "0";
         let succeededAmount = 0;
         if (this.props.timings) {
-            const step = Math.floor(this.props.timings!.succeeded.length / this.state.width);
-            let timingSum = 0;
-            if (this.props.timings.succeeded.length < this.state.width) {
-                timings = this.props.timings.succeeded.map(timing => {
-                    timingSum += timing;
-                    return timing;
-                });
+            const step = Math.floor(succeeded.length / this.state.width);
+            if (succeeded.length < this.state.width) {
+                timings = [...succeeded];
             } else {
                 timings = [];
+                // exponential moving average calculation
                 for (let i = 0; i < this.state.width; i++) {
                     const startingIndex = i*step;
                     const endingIndex = startingIndex + step;
-                    const slice = this.props.timings.succeeded.slice(startingIndex, endingIndex);
+                    const slice = succeeded.slice(startingIndex, endingIndex);
                     const average = slice.reduce((sum, element) => sum+element, 0)/slice.length;
                     const lastEMA = timings.length > 0 ? timings[timings.length-1] : null;
                     if (lastEMA === null) {
@@ -74,12 +72,15 @@ export class PerformCommand extends React.Component<TProps, TState> {
                     } else {
                         timings.push(ALPHA * average + (1 - ALPHA) * lastEMA);
                     }
-                    timingSum += average;
                 }
             }
-            average = (this.props.timings.succeeded.length === 0 ? 0 :
-                    (this.props.timings.succeeded.reduce((s, i) => s + i, 0) / this.props.timings.succeeded.length)).toFixed(2);
-            succeededAmount = this.props.timings.succeeded.length;
+            if (!succeeded.length) {
+                average = (0).toFixed(2);
+            } else {
+                const sum = succeeded.reduce((s, i) => s + i, 0);
+                average = (sum / succeeded.length).toFixed(2);
+            }
+            succeededAmount = succeeded.length;
 
             xScale = scaleBand({
                 rangeRound: [0, timings.length],
@@ -91,7 +92,6 @@ export class PerformCommand extends React.Component<TProps, TState> {
                 domain: [0, Math.max(...timings)]
             });
             compose = (scale: any, accessor: any) => (data: any) => scale(accessor(data));
-            // yPoint = compose(yScale, (d: number) => d);
             xPoint = (d: number, i: number) => i;
             yPoint = (d: number) => d;
 
@@ -109,7 +109,6 @@ export class PerformCommand extends React.Component<TProps, TState> {
                         y={0}
                         width={timings.length}
                         height={this.state.height}
-                        // fill="#32deaa"
                         fill="#222222"
                         rx={0} />
                     <defs>

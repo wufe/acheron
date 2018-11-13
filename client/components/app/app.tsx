@@ -26,6 +26,11 @@ type TState = {
     request?: TExecutingStressCommandRequest;
     timings?: TExecutingStressCommandTimings;
     runningStressId: string;
+    currentStressCommandValues?: {
+        url: string;
+        timeout: string;
+        threads: string;
+    }
 };
 
 const CHECK_POLL_INTERVAL = 500;
@@ -267,7 +272,15 @@ export class App extends React.Component<any, TState> {
                         threads: stressCommand.threads,
                         timeout: stressCommand.timeout,
                         url
-                    })).then(() => this.registerPoll(PERFORM_POLL_INTERVAL));
+                    })).then(() =>
+                        this.registerPoll(PERFORM_POLL_INTERVAL))
+                        .then(() => this.setStateAsPromise({ 
+                            currentStressCommandValues: {
+                                threads: `${stressCommand.threads}`,
+                                timeout: `${stressCommand.timeout}`,
+                                url: stressCommand.url
+                            }
+                        }))
                 } else {
                     this.addConsoleMessage({
                         type: TConsoleMessageType.ECHO,
@@ -300,6 +313,7 @@ export class App extends React.Component<any, TState> {
                                     return <BootingCommand key={i} />;
                                 case TConsoleMessageType.STRESS:
                                     return <StressCommand key={i}
+                                        currentStressCommandValues={this.state.currentStressCommandValues}
                                         onStressCommandSubmission={this.submitStressCommand}
                                         onWrongStressCommandSubmission={this.wrongStressCommandSubmission} />;
                                 case TConsoleMessageType.AUTH:

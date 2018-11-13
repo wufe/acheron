@@ -3,6 +3,11 @@ import { TStressMode, TStressRequestCommand } from '../console/types';
 import { filterKeyEnter } from '../../utils/handlers';
 
 type TProps = {
+    currentStressCommandValues?: {
+        url: string;
+        timeout: string;
+        threads: string;
+    };
     onStressCommandSubmission: (stressRequest: TStressRequestCommand) => any;
     onWrongStressCommandSubmission: () => any;
 };
@@ -62,6 +67,19 @@ export class StressCommand extends React.Component<TProps, TState> {
         });
     };
 
+    componentDidMount(){
+        const {currentStressCommandValues} = this.props;
+        if (currentStressCommandValues) {
+            const {url, timeout, threads} = currentStressCommandValues;
+            this.setState({
+                ...this.state,
+                url,
+                timeout,
+                threads
+            })
+        }
+    }
+
     render() {
         return <div className="terminal-container">
             <div>
@@ -76,6 +94,7 @@ export class StressCommand extends React.Component<TProps, TState> {
                     onKeyUp={filterKeyEnter(this.parseCommandAndSubmit)}
                     placeholder="https://"
                     type="text"
+                    style={{ width: '250px' }}
                     value={this.state.url} />}
                 {this.state.submitted && <span>{this.state.mode}</span>}
                 {!this.state.submitted && <select
